@@ -1,2 +1,2 @@
-rootProject.name='NewSimpleAndroidIot'
+rootProject.name='new-simple-android-iot'
 include ':app'
