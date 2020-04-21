@@ -5,9 +5,12 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.Gson
 import com.imlaidian.laidianclient.data.remote.IMonolithTerminalService
+import com.imlaidian.laidianclient.managerUtils.SettingInfoManager
 import com.imlaidian.laidianclient.utils.HyperlogUtils
 import id.recharge.iot_core.AwsIotCore
 import id.recharge.iot_core.AwsIotCoreConnectException
+import id.recharge.iot_core.model.PbProvisioningRequest
+import id.recharge.iot_core.service.PbProvisioningService
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
@@ -29,7 +32,7 @@ class MainActivity : AppCompatActivity()
         initAwsIotCore()
 
         btnCallReChargeMonolithApi.setOnClickListener {
-            logInfo("Calling getTerminalDetail on IMonolithTerminalService.")
+            logInfo("Calling getTerminalDetail on IMonolithTerminalService...")
             IMonolithTerminalService.create(this)
                 .getTerminalDetail("000030000004")
                 .subscribeOn(Schedulers.io())
@@ -45,12 +48,14 @@ class MainActivity : AppCompatActivity()
         }
 
         btnCallReChargeAwsLambdaApi.setOnClickListener {
-            AwsIotCore.doPbProvisioning(::onAwsIotCoreInitProgressUpdate)
+            logInfo("Calling doPbProvisioning on PbProvisioningService...")
+            PbProvisioningService.create()
+                .doPbProvisioning("000030000004", PbProvisioningRequest(SettingInfoManager.thingTypeName))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                     {
-                        logInfo("PB Provisioning Result: ${Gson().toJson(it.data)}")
+                        logInfo("PB Provisioning Result: ${Gson().toJson(it.body())}")
                     },
                     {
                         logInfo("Error when calling doPbProvisioning on AwsIotCore. Error:\n${Log.getStackTraceString(it)}")
