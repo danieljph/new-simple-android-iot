@@ -10,6 +10,7 @@ import com.imlaidian.laidianclient.utils.HyperlogUtils
 import id.recharge.commons.util.FileUtils
 import id.recharge.iot_core.model.PbProvisioningRequest
 import id.recharge.iot_core.model.PbProvisioningResponse
+import id.recharge.iot_core.model.RcDevice
 import id.recharge.iot_core.model.SimpleResponse
 import id.recharge.iot_core.service.PbProvisioningService
 import io.reactivex.Single

@@ -1,4 +1,4 @@
-package id.recharge.iot_core
+package id.recharge.iot_core.model
 
 import android.media.AudioManager
 import com.amazonaws.mobileconnectors.iot.AWSIotMqttManager
