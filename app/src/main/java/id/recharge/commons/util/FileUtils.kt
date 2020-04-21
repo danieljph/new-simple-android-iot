@@ -1,5 +1,6 @@
 package id.recharge.commons.util
 
+import com.imlaidian.laidianclient.utils.HyperlogUtils
 import timber.log.Timber
 import java.io.File
 import java.io.FileWriter
@@ -10,6 +11,16 @@ import java.io.FileWriter
 object FileUtils
 {
     private val TAG = FileUtils::class.java.simpleName
+
+    fun read(pathname: String): String
+    {
+        return read(File(pathname))
+    }
+
+    fun read(file: File): String
+    {
+        return file.readText(Charsets.UTF_8)
+    }
 
     fun write(file: File, data: String)
     {
@@ -51,6 +62,10 @@ object FileUtils
         if(checkFileExists(pathname))
         {
             delete(pathname)
+        }
+        else
+        {
+            HyperlogUtils.i(TAG, "File '$pathname' not exist. No need to delete the file.")
         }
     }
 

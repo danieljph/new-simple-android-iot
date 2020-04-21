@@ -38,7 +38,7 @@ class MainActivity : AppCompatActivity()
                 //if(it.cause is AWSIotTimeoutException)
                 //{
                     HyperlogUtils.e(TAG, it, "Failed to initiate AwsIotCore. Retrying by deleting old certificate & private key and getting the new one...")
-                    AwsIotCore.deleteOldSslFiles()
+                    AwsIotCore.deleteOldKeyStore()
                     HyperlogUtils.i(TAG, "Deleting old SSL files has done.")
                     shouldRetry = true
                 //}

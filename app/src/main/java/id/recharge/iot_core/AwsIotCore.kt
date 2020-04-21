@@ -15,7 +15,6 @@ import id.recharge.iot_core.service.PbProvisioningService
 import io.reactivex.Single
 import io.reactivex.SingleEmitter
 import io.reactivex.schedulers.Schedulers
-import java.lang.RuntimeException
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -35,12 +34,15 @@ object AwsIotCore
     private val keystorePassword = thingName
     @Suppress("DEPRECATION") val keystorePath = "${Environment.getExternalStorageDirectory().absolutePath}/LaidianClient/AWS/ssl"
     private val keystoreFullPath = "$keystorePath/$keystoreName"
+    private val certificatePathname = "$keystorePath/$thingName-certificate.pem.crt"
+    private val privateKeyPathname = "$keystorePath/$thingName-private.pem.key"
 
     private lateinit var mqttManager: AWSIotMqttManager
 
     fun init(onInitProgressUpdate: OnInitProgressUpdate): Single<Unit>
     {
         return Single.create { emitter ->
+            migrateCertificateAndPrivateKeyToKeyStore()
 
             if(FileUtils.checkFileExists(keystoreFullPath))
             {
@@ -65,13 +67,28 @@ object AwsIotCore
         }
     }
 
-    fun connect(emitter: SingleEmitter<Unit>, onInitProgressUpdate: OnInitProgressUpdate)
+    private fun connect(emitter: SingleEmitter<Unit>, onInitProgressUpdate: OnInitProgressUpdate)
     {
         onInitProgressUpdate("Reading KeyStore...")
         val clientKeyStore = AWSIotKeystoreHelper.getIotKeystore(certId, keystorePath, keystoreName, keystorePassword)
         onInitProgressUpdate("Reading KeyStore has done.")
 
         onInitProgressUpdate("Creating IotMqttManager...")
+
+        if(::mqttManager.isInitialized)
+        {
+            try
+            {
+                onInitProgressUpdate("Disconnecting old IotMqttManager...")
+                mqttManager.maxAutoReconnectAttempts = 1
+                mqttManager.disconnect()
+                onInitProgressUpdate("Disconnecting old IotMqttManager has done.")
+            }
+            catch(ex: Exception)
+            {
+                HyperlogUtils.e(TAG, ex, "Failed to disconnect old IotMqttManager.")
+            }
+        }
         mqttManager = AWSIotMqttManager(thingName, SettingInfoManager.awsIotCoreClientEndpoint)
         mqttManager.maxAutoReconnectAttempts = -1 // -1 = Retry forever.
         onInitProgressUpdate("Creating IotMqttManager has done.")
@@ -196,15 +213,50 @@ object AwsIotCore
         }
     }
 
-    fun deleteOldSslFiles()
+    fun deleteOldKeyStore()
     {
-        if(FileUtils.checkFileExists(keystoreFullPath))
+        FileUtils.deleteIfExists(keystoreFullPath)
+    }
+
+    private fun migrateCertificateAndPrivateKeyToKeyStore()
+    {
+        try
         {
-            FileUtils.delete(keystoreFullPath)
+            HyperlogUtils.i(TAG, "Migrating Certificate & Private Key files to KeyStore...")
+
+            if(FileUtils.checkFileExists(keystoreFullPath))
+            {
+                HyperlogUtils.i(TAG, "KeyStore file exist. No need to do the migration.")
+                deleteOldSslFiles()
+            }
+            else if(FileUtils.checkFileExists(certificatePathname) && FileUtils.checkFileExists(privateKeyPathname))
+            {
+                val certificatePem = FileUtils.read(certificatePathname)
+                val privateKeyPem = FileUtils.read(privateKeyPathname)
+                HyperlogUtils.i(TAG, "Saving Certificate and Private Key to KeyStore...")
+                AWSIotKeystoreHelper.saveCertificateAndPrivateKey(certId, certificatePem, privateKeyPem, keystorePath, keystoreName, keystorePassword)
+                HyperlogUtils.i(TAG, "Saving Certificate and Private Key to KeyStore has done.")
+                deleteOldSslFiles()
+            }
+            else
+            {
+                HyperlogUtils.i(TAG, "Certificate or Private Key files not exist. No need to do the migration.")
+            }
+
+            HyperlogUtils.i(TAG, "Migrating Certificate & Private Key files to KeyStore has done.")
         }
-        else
+        catch(ex: Exception)
         {
-            HyperlogUtils.i(TAG, "File '$keystoreFullPath' not exist. No need to delete the file.")
+            HyperlogUtils.e(TAG, ex, "Failed to migrate Certificate & Private Key files to KeyStore.")
+            deleteOldSslFiles()
         }
+    }
+
+    private fun deleteOldSslFiles()
+    {
+        HyperlogUtils.i(TAG, "Deleting old SSL files...")
+        FileUtils.deleteIfExists(certificatePathname)
+        FileUtils.deleteIfExists(privateKeyPathname)
+        HyperlogUtils.i(TAG, "Deleting old SSL files has done.")
     }
 }

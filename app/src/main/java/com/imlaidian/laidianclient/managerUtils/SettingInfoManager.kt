@@ -6,7 +6,7 @@ package com.imlaidian.laidianclient.managerUtils
 object SettingInfoManager
 {
     const val thingTypeName = "LDX"
-    var terminalId = "000030000005"
+    var terminalId = "000030000006"
     var terminalName = "Rumah DJPH Test"
     var awsIotCoreShadowReportIntervalInMilliseconds = 5000_000L
     var awsIotCoreClientEndpoint = "a23x7roz31nypq-ats.iot.us-east-1.amazonaws.com"

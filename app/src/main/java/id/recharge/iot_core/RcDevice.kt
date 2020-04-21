@@ -1,10 +1,12 @@
 package id.recharge.iot_core
 
+import android.media.AudioManager
 import com.amazonaws.mobileconnectors.iot.AWSIotMqttManager
 import com.amazonaws.services.iot.client.AWSIotDevice
 import com.amazonaws.services.iot.client.AWSIotDeviceProperty
 import com.imlaidian.laidianclient.managerUtils.SettingInfoManager
 import com.imlaidian.laidianclient.utils.HyperlogUtils
+import id.recharge.commons.util.AudioManagerUtils
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
@@ -48,6 +50,29 @@ class RcDevice(mqttManager: AWSIotMqttManager, thingName: String) : AWSIotDevice
         {
             HyperlogUtils.e("RcDevice", "Dapat desired value nih: $desiredValue")
             field = desiredValue
+        }
+
+    @field:AWSIotDeviceProperty var streamMusicMaxVolume: Int? = null
+        get() = AudioManagerUtils.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+
+    @field:AWSIotDeviceProperty var streamMusicVolume: Int? = null
+        set(desiredValue) {
+            try
+            {
+                if(desiredValue!=null)
+                {
+                    AudioManagerUtils.setStreamVolume(AudioManager.STREAM_MUSIC, desiredValue, AudioManager.FLAG_SHOW_UI)
+                    field = desiredValue
+                    hasChanges = true
+                }
+            }
+            catch(ex: Exception)
+            {
+                HyperlogUtils.e(TAG, ex, "Failed to set 'Stream Music Volume Index'.")
+            }
+        }
+        get() {
+            return AudioManagerUtils.getStreamVolume(AudioManager.STREAM_MUSIC)
         }
 
     @field:AWSIotDeviceProperty var slotInfoList: List<SlotInfo>? = null
