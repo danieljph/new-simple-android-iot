@@ -103,7 +103,7 @@ object AwsIotCore
             {
                 if(isConnectDone)
                 {
-                    HyperlogUtils.e(TAG, throwable)
+                    HyperlogUtils.e(TAG, throwable, "AWSIotMqttManager failed to connect.")
                 }
                 else
                 {

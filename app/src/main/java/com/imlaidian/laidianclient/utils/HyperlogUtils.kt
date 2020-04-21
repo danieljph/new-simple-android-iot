@@ -27,11 +27,6 @@ object HyperlogUtils
         Timber.tag(tag).e(message)
     }
 
-    fun e(tag: String, throwable: Throwable)
-    {
-        Timber.tag(tag).e(throwable)
-    }
-
     fun e(tag: String, throwable: Throwable, message: String)
     {
         Timber.tag(tag).e(throwable, message)
