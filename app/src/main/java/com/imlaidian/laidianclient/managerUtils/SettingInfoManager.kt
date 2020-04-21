@@ -12,4 +12,6 @@ object SettingInfoManager
     var awsIotCoreClientEndpoint = "a23x7roz31nypq-ats.iot.us-east-1.amazonaws.com"
     var serverlessV2BaseUrl = "https://api-dev.vendingkita.com"
     var serverlessV2ApiKey = "bDUdEHRH61agAQUHQ6FWH6SDm81fdjvg5DOTRh03"
+
+    var monolithBaseUrl = "https://dev-phoneix.recharge.id/recharge_backend_laravel_v2/public/v1.0.0/"
 }

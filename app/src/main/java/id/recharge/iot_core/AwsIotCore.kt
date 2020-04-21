@@ -165,7 +165,7 @@ object AwsIotCore
     }
 
     @SuppressLint("CheckResult")
-    private fun doPbProvisioning(onInitProgressUpdate: OnInitProgressUpdate): Single<SimpleResponse<PbProvisioningResponse>>
+    fun doPbProvisioning(onInitProgressUpdate: OnInitProgressUpdate): Single<SimpleResponse<PbProvisioningResponse>>
     {
         onInitProgressUpdate("Calling PB Provisioning service...")
 

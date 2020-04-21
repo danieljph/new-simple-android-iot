@@ -26,6 +26,11 @@ object RetrofitUtils
         return enableCache && context!=null
     }
 
+    fun <T> createCachedMonolithService(service: Class<T>, context: Context): T
+    {
+        return createService(service, SettingInfoManager.monolithBaseUrl, null, true, context)
+    }
+
     fun <T> createServerlessV2Service(service: Class<T>): T
     {
         return createService(service, SettingInfoManager.serverlessV2BaseUrl, SettingInfoManager.serverlessV2ApiKey, false, null)

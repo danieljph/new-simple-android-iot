@@ -1,9 +1,13 @@
 package id.recharge.new_simple_android_iot
 
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import com.google.gson.Gson
+import com.imlaidian.laidianclient.data.remote.IMonolithTerminalService
 import com.imlaidian.laidianclient.utils.HyperlogUtils
 import id.recharge.iot_core.AwsIotCore
+import id.recharge.iot_core.AwsIotCoreConnectException
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
@@ -23,6 +27,38 @@ class MainActivity : AppCompatActivity()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         initAwsIotCore()
+
+        btnCallReChargeMonolithApi.setOnClickListener {
+            logInfo("Calling getTerminalDetail on IMonolithTerminalService.")
+            IMonolithTerminalService.create(this)
+                .getTerminalDetail("000030000004")
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                    {
+                        logInfo("Terminal Info: ${Gson().toJson(it.body())}")
+                    },
+                    {
+                        logInfo("Error when calling getTerminalDetail on IMonolithTerminalService. Error:\n${Log.getStackTraceString(it)}")
+                    }
+                )
+        }
+
+        btnCallReChargeAwsLambdaApi.setOnClickListener {
+            AwsIotCore.doPbProvisioning(::onAwsIotCoreInitProgressUpdate)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                    {
+                        logInfo("PB Provisioning Result: ${Gson().toJson(it.data)}")
+                    },
+                    {
+                        logInfo("Error when calling doPbProvisioning on AwsIotCore. Error:\n${Log.getStackTraceString(it)}")
+                    }
+                )
+        }
+
+        btnClearLog.setOnClickListener { tvInfo.text = "Log Info:\n" }
     }
 
     private fun initAwsIotCore()
@@ -35,17 +71,17 @@ class MainActivity : AppCompatActivity()
                  */
                 var shouldRetry = false
 
-                //if(it.cause is AWSIotTimeoutException)
-                //{
-                    HyperlogUtils.e(TAG, it, "Failed to initiate AwsIotCore. Retrying by deleting old certificate & private key and getting the new one...")
+                if(it.cause is AwsIotCoreConnectException)
+                {
+                    HyperlogUtils.e(TAG, it, "Failed to initiate AwsIotCore. Retrying by deleting old KeyStore and getting the new one...")
                     AwsIotCore.deleteOldKeyStore()
-                    HyperlogUtils.i(TAG, "Deleting old SSL files has done.")
+                    HyperlogUtils.i(TAG, "Deleting old KeyStore file has done.")
                     shouldRetry = true
-                //}
-                //else
-                //{
-                //    HyperlogUtils.i(TAG, "No need to retry AwsIotCore initiation because the exception is not instance of AWSIotTimeoutException.")
-                //}
+                }
+                else
+                {
+                    HyperlogUtils.i(TAG, "No need to retry AwsIotCore initiation because the exception is not instance of AwsIotCoreConnectException.")
+                }
 
                 return@retry shouldRetry
             }
@@ -53,10 +89,10 @@ class MainActivity : AppCompatActivity()
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
                 {
-                    updateInfo("IotCore initialized successfully.")
+                    logInfo("IotCore initialized successfully.")
                 },
                 {
-                    updateInfo("Failed to initiate IotCore.", it)
+                    logInfo("Failed to initiate IotCore. Error:\n${Log.getStackTraceString(it)}")
                 }
             )
             .addTo(defaultCompositeDisposable)
@@ -64,22 +100,12 @@ class MainActivity : AppCompatActivity()
 
     private fun onAwsIotCoreInitProgressUpdate(message: String)
     {
-        updateInfo(message)
+        logInfo(message)
     }
 
-    private fun updateInfo(message: String, t: Throwable? = null)
+    private fun logInfo(message: String)
     {
-        if(t==null)
-        {
-            HyperlogUtils.i(TAG, message)
-        }
-        else
-        {
-            HyperlogUtils.e(TAG, t, message)
-        }
-
-        runOnUiThread {
-            tvInfo.text = message
-        }
+        HyperlogUtils.i(TAG, message)
+        tvInfo.append(message+'\n')
     }
 }
