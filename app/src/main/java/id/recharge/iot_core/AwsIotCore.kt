@@ -139,9 +139,9 @@ object AwsIotCore
         if(isTimeout)
         {
             connectException?.also {
-                emitter.onError(AWSIotMqttManagerConnectException("IotMqttManager failed to connect to IOT Core.", it))
+                emitter.onError(AwsIotCoreConnectException("IotMqttManager failed to connect to IOT Core.", it))
             }?: run {
-                emitter.onError(AWSIotMqttManagerConnectException("IotMqttManager failed to connect to IOT Core after waiting for ${AWS_CONNECT_TIMEOUT_IN_MILLISECONDS}ms."))
+                emitter.onError(AwsIotCoreConnectException("IotMqttManager failed to connect to IOT Core after waiting for ${AWS_CONNECT_TIMEOUT_IN_MILLISECONDS}ms."))
             }
         }
         else
@@ -186,7 +186,7 @@ object AwsIotCore
 
                                 if(certificatePem!=null && privateKeyPem!=null)
                                 {
-                                    FileUtils.deleteIfExists("$keystorePath/$keystoreName")
+                                    FileUtils.deleteIfExists(keystoreFullPath)
                                     onInitProgressUpdate("Saving Certificate and Private Key in KeyStore...")
                                     AWSIotKeystoreHelper.saveCertificateAndPrivateKey(certId, certificatePem, privateKeyPem, keystorePath, keystoreName, keystorePassword)
                                     onInitProgressUpdate("Saving Certificate and Private Key in KeyStore has done.")
@@ -216,7 +216,9 @@ object AwsIotCore
 
     fun deleteOldKeyStore()
     {
+        HyperlogUtils.i(TAG, "Deleting old KeyStore file...")
         FileUtils.deleteIfExists(keystoreFullPath)
+        HyperlogUtils.i(TAG, "Deleting old KeyStore file has done.")
     }
 
     private fun migrateCertificateAndPrivateKeyToKeyStore()
