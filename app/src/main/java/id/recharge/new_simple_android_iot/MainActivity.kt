@@ -22,7 +22,7 @@ import kotlinx.android.synthetic.main.activity_main.*
  */
 class MainActivity : AppCompatActivity()
 {
-    private val TAG = AwsIotCore::class.java.simpleName
+    private val TAG = MainActivity::class.java.simpleName
     private val defaultCompositeDisposable = CompositeDisposable()
 
     override fun onCreate(savedInstanceState: Bundle?)
