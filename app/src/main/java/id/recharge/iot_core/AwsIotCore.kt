@@ -138,9 +138,9 @@ object AwsIotCore
         if(isTimeout)
         {
             connectException?.also {
-                emitter.onError(RuntimeException("IotMqttManager failed to connect to IOT Core.", it))
+                emitter.onError(AWSIotMqttManagerConnectException("IotMqttManager failed to connect to IOT Core.", it))
             }?: run {
-                emitter.onError(RuntimeException("IotMqttManager failed to connect to IOT Core after waiting for ${AWS_CONNECT_TIMEOUT_IN_MILLISECONDS}ms."))
+                emitter.onError(AWSIotMqttManagerConnectException("IotMqttManager failed to connect to IOT Core after waiting for ${AWS_CONNECT_TIMEOUT_IN_MILLISECONDS}ms."))
             }
         }
         else
