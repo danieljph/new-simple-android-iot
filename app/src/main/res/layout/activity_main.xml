@@ -20,10 +20,16 @@
             android:text="Call ReCharge Monolith API" />
 
         <Button
-            android:id="@+id/btnCallReChargeAwsLambdaApi"
+            android:id="@+id/btnCallNewReChargeAwsLambdaApi"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Call ReCharge AWS Lambda API" />
+            android:text="Call New ReCharge AWS Lambda API" />
+
+        <Button
+            android:id="@+id/btnCallOldReChargeAwsLambdaApi"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Call Old ReCharge AWS Lambda API" />
 
         <Button
             android:id="@+id/btnClearLog"

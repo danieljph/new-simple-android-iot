@@ -10,6 +10,7 @@ import com.imlaidian.laidianclient.utils.HyperlogUtils
 import id.recharge.iot_core.AwsIotCore
 import id.recharge.iot_core.AwsIotCoreConnectException
 import id.recharge.iot_core.model.PbProvisioningRequest
+import id.recharge.iot_core.service.OldPbProvisioningService
 import id.recharge.iot_core.service.PbProvisioningService
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -47,7 +48,7 @@ class MainActivity : AppCompatActivity()
                 )
         }
 
-        btnCallReChargeAwsLambdaApi.setOnClickListener {
+        btnCallNewReChargeAwsLambdaApi.setOnClickListener {
             logInfo("Calling doPbProvisioning on PbProvisioningService...")
             PbProvisioningService.create()
                 .doPbProvisioning("000030000004", PbProvisioningRequest(SettingInfoManager.thingTypeName))
@@ -58,7 +59,23 @@ class MainActivity : AppCompatActivity()
                         logInfo("PB Provisioning Result: ${Gson().toJson(it.body())}")
                     },
                     {
-                        logInfo("Error when calling doPbProvisioning on AwsIotCore. Error:\n${Log.getStackTraceString(it)}")
+                        logInfo("Error when calling doPbProvisioning on PbProvisioningService. Error:\n${Log.getStackTraceString(it)}")
+                    }
+                )
+        }
+
+        btnCallOldReChargeAwsLambdaApi.setOnClickListener {
+            logInfo("Calling doPbProvisioning on OldPbProvisioningService...")
+            OldPbProvisioningService.create()
+                .doPbProvisioning("000030000004")
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                    {
+                        logInfo("PB Provisioning Result: ${Gson().toJson(it.body())}")
+                    },
+                    {
+                        logInfo("Error when calling doPbProvisioning on OldPbProvisioningService. Error:\n${Log.getStackTraceString(it)}")
                     }
                 )
         }

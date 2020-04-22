@@ -2,7 +2,6 @@ package id.recharge.commons.util
 
 import android.content.Context
 import com.imlaidian.laidianclient.managerUtils.SettingInfoManager
-import id.recharge.new_simple_android_iot.BuildConfig
 import okhttp3.Cache
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -11,6 +10,7 @@ import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
+
 
 /**
  * @author Daniel Joi Partogi Hutapea
@@ -29,6 +29,11 @@ object RetrofitUtils
     fun <T> createCachedMonolithService(service: Class<T>, context: Context): T
     {
         return createService(service, SettingInfoManager.monolithBaseUrl, null, true, context)
+    }
+
+    fun <T> createServerlessService(service: Class<T>): T
+    {
+        return createService(service, SettingInfoManager.serverlessBaseUrl, SettingInfoManager.serverlessApiKey, false, null)
     }
 
     fun <T> createServerlessV2Service(service: Class<T>): T
@@ -60,12 +65,33 @@ object RetrofitUtils
         }
 
         okHttpClientBuilder.addInterceptor(addHeadersInterceptor)
+        okHttpClientBuilder.addInterceptor(loggingInterceptor)
 
-        @Suppress("ConstantConditionIf")
-        if(BuildConfig.FLAVOR == "dev")
+        // 1) Fix SSL issue? No
+        /*
+        val trustManagerFactory: TrustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm())
+        trustManagerFactory.init(null as KeyStore?)
+        val trustManagers: Array<TrustManager> = trustManagerFactory.trustManagers
+        check(!(trustManagers.size != 1 || trustManagers[0] !is X509TrustManager))
         {
-            okHttpClientBuilder.addInterceptor(loggingInterceptor)
+            ("Unexpected default trust managers:" + trustManagers.contentToString())
         }
+        val trustManager: X509TrustManager = trustManagers[0] as X509TrustManager
+        val sslContext: SSLContext = SSLContext.getInstance("TLSv1.2")
+        sslContext.init(null, arrayOf<TrustManager>(trustManager), null)
+        val sslSocketFactory: SSLSocketFactory = sslContext.socketFactory
+
+        okHttpClientBuilder.sslSocketFactory(sslSocketFactory, trustManager)
+         */
+
+        // 2) Fix SSL issue? No
+        /*
+        val requireTls12 = ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
+            .tlsVersions(TlsVersion.TLS_1_2)
+            .build()
+
+        okHttpClientBuilder.connectionSpecs(arrayListOf(requireTls12))
+         */
 
         val client = okHttpClientBuilder.build()
         val retrofit = Retrofit.Builder().apply {

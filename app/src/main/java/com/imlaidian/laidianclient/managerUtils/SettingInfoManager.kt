@@ -10,8 +10,9 @@ object SettingInfoManager
     var terminalName = "Rumah DJPH Test"
     var awsIotCoreShadowReportIntervalInMilliseconds = 5000_000L
     var awsIotCoreClientEndpoint = "a23x7roz31nypq-ats.iot.us-east-1.amazonaws.com"
+    var serverlessBaseUrl = "https://terminal-logs-dev.recharge.id"
+    var serverlessApiKey = "bkHlea88cV8YnLwEtrecZ34gB0lg9zDL1GL9NubF"
     var serverlessV2BaseUrl = "https://api-dev.vendingkita.com"
     var serverlessV2ApiKey = "bDUdEHRH61agAQUHQ6FWH6SDm81fdjvg5DOTRh03"
-
     var monolithBaseUrl = "https://dev-phoneix.recharge.id/recharge_backend_laravel_v2/public/v1.0.0/"
 }
